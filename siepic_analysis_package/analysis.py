@@ -9,6 +9,7 @@ Module: Data processing and analysis functionalities of the analysis package
 """
 import numpy as np
 import math
+from datetime import datetime
 
 class measurement(object):
     """
@@ -213,17 +214,21 @@ class measurement(object):
         if savepdf:
             if self.dieID != None:
                 fig1.savefig(self.deviceID + "_Die" + self.dieID + '.pdf')
-                fig2.savefig(self.deviceID + "_Die" + self.dieID + '_Sweep.pdf')
+                if active:
+                    fig2.savefig(self.deviceID + "_Die" + self.dieID + '_Sweep.pdf')
             else:
                 fig1.savefig(self.deviceID + '.pdf')
-                fig2.savefig(self.deviceID + '_Sweep.pdf') 
+                if active:
+                    fig2.savefig(self.deviceID + '_Sweep.pdf') 
         if savepng:
             if self.dieID != None:
                 fig1.savefig(self.deviceID + "_Die" + self.dieID + '.png')
-                fig2.savefig(self.deviceID + "_Die" + self.dieID + '_Sweep.png')
+                if active:
+                    fig2.savefig(self.deviceID + "_Die" + self.dieID + '_Sweep.png')
             else:
                 fig1.savefig(self.deviceID + '.png')
-                fig2.savefig(self.deviceID + '_Sweep.png') 
+                if active:
+                    fig2.savefig(self.deviceID + '_Sweep.png') 
 
         if (active == False):
             plt.close(fig2)
@@ -493,6 +498,12 @@ def processCSV(f_name):
     with open(f_name, newline='') as csvfile:
         cursor = csv.reader(csvfile, delimiter=',', quotechar='"')
         pwr = None  # measurement power array initialization
+        deviceID = None
+        start = None
+        finish = None
+        coordsGDS = ""
+        coordsMotor = ""
+        date = None
         # iterate over each row and parse its data to the proper variable
         for row in cursor:
             row = ' '.join(row).strip("#").strip()
@@ -557,6 +568,16 @@ def processCSV(f_name):
                 else:
                     pwr = row.split(' ')
                     pwr = [[float(i) for i in pwr[1:]]]
+    
+    # If no deviceID found, use filename as deviceID
+    if deviceID == None:
+        deviceID = f_name.split("/")[-1].split("\\")[-1].split(".")[0]
+    if start == None:
+        start = datetime.now().strftime("%d-%b-%Y %H:%M:%S")
+    if finish == None:
+        finish = datetime.now().strftime("%d-%b-%Y %H:%M:%S")
+    if date == None:
+        date = datetime.now().strftime("%d-%b-%Y %H:%M:%S")
 
     device = measurement(deviceID=deviceID, user=user, start=start,
                          finish=finish, coordsGDS=coordsGDS,
